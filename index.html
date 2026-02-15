@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>בורד מגמות - הבורסה האמריקאית</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="hero">
+        <h1>בורד מגמות בבורסה האמריקאית</h1>
+        <p>מעקב מהיר אחרי מדדים, מניות מובילות ומגמות יומיות.</p>
+      </header>
+
+      <section class="controls">
+        <label for="symbols">סימבולים למעקב (מופרדים בפסיק)</label>
+        <div class="control-row">
+          <input id="symbols" type="text" value="SPY,QQQ,DIA,AAPL,MSFT,NVDA,TSLA" />
+          <button id="refreshBtn">רענון נתונים</button>
+        </div>
+        <small>הנתונים נמשכים מ-Financial Modeling Prep (demo). במקרה של כשל תוצג דוגמת נתונים.</small>
+      </section>
+
+      <section>
+        <h2>שוק כללי</h2>
+        <div id="marketSummary" class="grid three"></div>
+      </section>
+
+      <section>
+        <h2>מעקב סימבולים</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>סימבול</th>
+                <th>שם</th>
+                <th>מחיר אחרון</th>
+                <th>שינוי יומי</th>
+                <th>% שינוי</th>
+                <th>מגמה</th>
+              </tr>
+            </thead>
+            <tbody id="quotesBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2>מובילי עליות / ירידות</h2>
+        <div class="grid two">
+          <article>
+            <h3>Top Gainers</h3>
+            <ul id="gainersList" class="list"></ul>
+          </article>
+          <article>
+            <h3>Top Losers</h3>
+            <ul id="losersList" class="list"></ul>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
