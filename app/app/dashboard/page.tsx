@@ -1,0 +1,6 @@
+import { environments } from '@/lib/data/mock';
+import { Card } from '@/components/ui/card';
+
+export default function DashboardPage() {
+  return <div className="space-y-6"><section><h1 className="text-3xl font-semibold">Welcome back, Amir</h1><p className="text-slate-400">Your broadcast stack is healthy and ready.</p></section><section className="grid gap-4 md:grid-cols-4">{['Generations used: 18/40','Live profiles: 5','Marketplace assets: 26','Output uptime: 99.2%'].map((x)=><Card key={x}>{x}</Card>)}</section><section className="grid gap-4 lg:grid-cols-3"><Card className="lg:col-span-2"><h2 className="font-semibold">Recent environments</h2><div className="mt-3 space-y-2 text-sm text-slate-300">{environments.slice(0,3).map((e)=><p key={e.id}>{e.title} • {e.status}</p>)}</div></Card><Card><h2 className="font-semibold">Broadcast status</h2><p className="mt-3 text-emerald-300">NDI output active</p><p className="text-sm text-slate-400">OBS + Singular linked</p></Card></section><Card><h2 className="font-semibold">Activity feed</h2><ul className="mt-2 list-disc pl-5 text-sm text-slate-300"><li>Tokyo Plaza duplicated for new sponsor deck.</li><li>Preset “Nightly Talk Show” updated with lower thirds.</li><li>Admin approved 4 marketplace submissions.</li></ul></Card></div>;
+}
