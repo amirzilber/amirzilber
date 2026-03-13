@@ -1,0 +1,6 @@
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+
+export default function BroadcastPage() {
+  return <div className="grid gap-4 lg:grid-cols-3"><Card className="lg:col-span-2"><h1 className="text-2xl font-semibold">Broadcast Control</h1><p className="mt-2 text-emerald-300">NDI output status: Live</p><div className="mt-4 grid gap-3 md:grid-cols-2"><label>Overlay layer<input defaultValue="Enabled"/></label><label>Lower thirds<input defaultValue="On"/></label><label>Chroma mode<input defaultValue="Green balanced"/></label><label>Output profile<input defaultValue="Live 4K"/></label></div><div className="mt-4 h-64 rounded-lg border border-dashed border-white/20 grid place-items-center text-slate-500">Preview monitor placeholder</div></Card><Card><h2 className="font-semibold">Compatibility</h2><div className="mt-3 flex flex-wrap gap-2"><Badge>OBS Connected</Badge><Badge>vMix Ready</Badge><Badge>Singular Linked</Badge></div><h3 className="mt-5 font-semibold">Readiness checklist</h3><ul className="mt-2 list-disc pl-5 text-sm text-slate-300"><li>Genlock synced</li><li>Lower thirds validated</li><li>Fallback scene armed</li><li>Audio return path checked</li></ul></Card></div>;
+}
