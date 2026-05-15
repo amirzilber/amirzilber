@@ -321,13 +321,17 @@ footer {
 <!-- FOOTER -->
 <footer>
   <span class="footer-text">כל פקק הוא <strong>הישג נוסף</strong> במרשם הניהול של שרת התחבורה</span>
-  <span class="footer-sig">מירי רגב — שרת התחבורה | נתוני דמו לצרכי סאטירה</span>
+  <span class="footer-sig" id="dataSrc">⏳ מתחבר ל-TomTom...</span>
 </footer>
 
 </div>
 <div class="toast" id="toast">הקישור הועתק! 🔗</div>
 
 <script>
+// ── TOMTOM CONFIG ──
+const TT_KEY = 'bpjqLbkLxkHewEI1lTGmwfLQLFY0vRLB';
+const TT_REFRESH = 5 * 60 * 1000; // every 5 min → ~2,016 API calls/day (under 2,500 free limit)
+
 // ── CITIES ──
 const CITIES = [
   { label:'🗺️ כל הארץ', zoom:8,  lat:31.77, lon:34.99 },
@@ -337,15 +341,12 @@ const CITIES = [
   { label:'🌵 באר שבע', zoom:12, lat:31.25, lon:34.79 },
   { label:'🌊 נתניה',   zoom:12, lat:32.33, lon:34.86 },
 ];
-let activeCity = 0;
-
 const cityGrid = document.getElementById('cityGrid');
 CITIES.forEach((c, i) => {
   const btn = document.createElement('button');
   btn.className = 'city-btn' + (i === 0 ? ' active' : '');
   btn.textContent = c.label;
   btn.addEventListener('click', () => {
-    activeCity = i;
     document.querySelectorAll('.city-btn').forEach((b,j) => b.classList.toggle('active', j===i));
     document.getElementById('wazeMap').src =
       `https://embed.waze.com/iframe?zoom=${c.zoom}&lat=${c.lat}&lon=${c.lon}&ct=livemap&pin=0`;
@@ -353,16 +354,17 @@ CITIES.forEach((c, i) => {
   cityGrid.appendChild(btn);
 });
 
-// ── ROUTES ──
+// ── ROUTES (with real GPS points for flow API) ──
 const ROUTES = [
-  { name:'כביש איילון', base:91 },
-  { name:'כביש 20 (בגין)', base:84 },
-  { name:'כביש 1 (ת"א-ירושלים)', base:76 },
-  { name:'כביש 4', base:68 },
-  { name:'כביש 2 (חוף)', base:62 },
-  { name:'כביש 6', base:40 },
+  { name:'כביש איילון',           lat:32.085, lon:34.793, base:88 },
+  { name:'כביש 20 (בגין)',        lat:31.972, lon:34.812, base:82 },
+  { name:'כביש 1 (ת"א-ירושלים)',  lat:31.868, lon:34.967, base:74 },
+  { name:'כביש 4',                lat:32.095, lon:34.883, base:66 },
+  { name:'כביש 2 (חוף)',          lat:32.167, lon:34.838, base:60 },
+  { name:'כביש 6',                lat:32.097, lon:34.966, base:38 },
 ];
 
+// ── UI HELPERS ──
 function congColor(pct) {
   if (pct >= 80) return '#e03030';
   if (pct >= 55) return '#e67e22';
@@ -375,8 +377,22 @@ function congLabel(pct) {
   if (pct >= 35) return 'זרימה איטית';
   return 'נסיעה סבירה';
 }
+function animCount(el, from, to, dur=700) {
+  const start = performance.now(), diff = to - from;
+  (function step(now) {
+    const t = Math.min(1, (now - start) / dur);
+    const e = t < .5 ? 2*t*t : -1+(4-2*t)*t;
+    el.textContent = Math.round(from + diff * e).toLocaleString('he-IL');
+    if (t < 1) requestAnimationFrame(step);
+  })(start);
+}
+function setDataSource(live) {
+  document.getElementById('dataSrc').textContent = live
+    ? '📡 נתונים חיים — TomTom Traffic API'
+    : '⚠ נתוני הדמאה (TomTom לא זמין)';
+}
 
-const routeEls = [];
+// ── BUILD ROUTE DOM ──
 const routesList = document.getElementById('routesList');
 ROUTES.forEach(r => {
   const div = document.createElement('div');
@@ -389,70 +405,121 @@ ROUTES.forEach(r => {
     <div class="route-bar-bg"><div class="route-bar-fill" id="rb-${r.name}" style="width:0%;background:#333"></div></div>
     <div class="route-status" id="rs-${r.name}">טוען...</div>`;
   routesList.appendChild(div);
-  routeEls.push(r);
 });
 
-function updateRoutes() {
+function applyRoute(r) {
+  const pct = r.base, col = congColor(pct);
+  document.getElementById(`rp-${r.name}`).textContent = pct + '%';
+  document.getElementById(`rp-${r.name}`).style.color = col;
+  const bar = document.getElementById(`rb-${r.name}`);
+  bar.style.width = pct + '%';
+  bar.style.background = col;
+  document.getElementById(`rs-${r.name}`).textContent = congLabel(pct);
+}
+
+// Small simulated fluctuation between TomTom refreshes
+function tickRoutes() {
   ROUTES.forEach(r => {
-    const delta = Math.floor((Math.random()-.5)*8);
-    r.base = Math.max(15, Math.min(98, r.base + delta));
-    const pct = r.base;
-    const col = congColor(pct);
-    document.getElementById(`rp-${r.name}`).textContent = pct + '%';
-    document.getElementById(`rp-${r.name}`).style.color = col;
-    const bar = document.getElementById(`rb-${r.name}`);
-    bar.style.width = pct + '%';
-    bar.style.background = col;
-    document.getElementById(`rs-${r.name}`).textContent = congLabel(pct);
+    r.base = Math.max(5, Math.min(99, r.base + Math.floor((Math.random()-.5)*6)));
+    applyRoute(r);
   });
 }
-setTimeout(updateRoutes, 400);
-setInterval(updateRoutes, 9000);
+setTimeout(tickRoutes, 500);
+setInterval(tickRoutes, 10000);
 
 // ── STAT CARDS ──
-const STATS = {
-  jams:    { el:'s-jams',    base:218, min:140, max:340, step:5  },
-  delay:   { el:'s-delay',   base:34,  min:18,  max:55,  step:2  },
-  drivers: { el:'s-drivers', base:1240,min:800, max:2000,step:30 },
-  cost:    { el:'s-cost',    base:380, min:280, max:520, step:8  },
+const STAT_CFG = {
+  jams:    { el:'s-jams',    base:218, min:100, max:400, step:5  },
+  delay:   { el:'s-delay',   base:34,  min:10,  max:60,  step:2  },
+  drivers: { el:'s-drivers', base:1240,min:600, max:2200,step:30 },
+  cost:    { el:'s-cost',    base:380, min:200, max:600, step:8  },
 };
-
-function animCount(el, from, to, dur=600) {
-  const start = performance.now();
-  const diff = to - from;
-  function step(now) {
-    const t = Math.min(1, (now - start) / dur);
-    const ease = t < .5 ? 2*t*t : -1+(4-2*t)*t;
-    el.textContent = Math.round(from + diff * ease).toLocaleString('he-IL');
-    if (t < 1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
-}
-
 const statVals = {};
-function updateStats() {
-  Object.entries(STATS).forEach(([key, cfg]) => {
+
+function applyStats(overrides = {}) {
+  Object.entries(STAT_CFG).forEach(([key, cfg]) => {
+    const forced = overrides[key];
     const prev = statVals[key] ?? cfg.base;
-    const next = Math.max(cfg.min, Math.min(cfg.max, prev + Math.floor((Math.random()-.5)*2*cfg.step)));
+    const next = forced != null
+      ? forced
+      : Math.max(cfg.min, Math.min(cfg.max, prev + Math.floor((Math.random()-.5)*2*cfg.step)));
     statVals[key] = next;
     const el = document.getElementById(cfg.el);
     animCount(el, prev, next);
     el.classList.add('flash');
-    setTimeout(() => el.classList.remove('flash'), 600);
+    setTimeout(() => el.classList.remove('flash'), 700);
   });
 }
-setTimeout(updateStats, 200);
-setInterval(updateStats, 8000);
+setTimeout(() => applyStats(), 300);
+setInterval(() => applyStats(), 9000);
 
-// ── SHAME COUNTER ──
-// ~800,000 hours/day = 9.26 hrs/sec
-// Start from Jan 1 of current year
+// ── TOMTOM API ──
+async function ttFetchIncidents() {
+  // Central Israel bbox (minLon,minLat,maxLon,maxLat) — ~7,000 km², within TomTom limit
+  const bbox = '34.4,31.5,35.6,32.8';
+  const fields = encodeURIComponent('{incidents{type,properties{iconCategory,magnitudeOfDelay,delay}}}');
+  const url = `https://api.tomtom.com/traffic/services/5/incidentDetails` +
+    `?key=${TT_KEY}&bbox=${bbox}&fields=${fields}&language=he-IL&t=1111&timeValidityFilter=PRESENT`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('incidents ' + r.status);
+  return r.json();
+}
+
+async function ttFetchFlow(lat, lon) {
+  const url = `https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json` +
+    `?point=${lat},${lon}&key=${TT_KEY}`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('flow ' + r.status);
+  return r.json();
+}
+
+async function loadTomTomData() {
+  let gotLiveData = false;
+
+  // 1. Incidents → update jams count + avg delay
+  try {
+    const data = await ttFetchIncidents();
+    const incidents = data.incidents || [];
+    const jams    = incidents.filter(i => [6,7,8].includes(i.properties?.iconCategory)).length;
+    const delays  = incidents.map(i => i.properties?.delay).filter(d => d > 0);
+    const avgDelaySec = delays.length ? delays.reduce((a,b)=>a+b,0)/delays.length : null;
+
+    const overrides = { jams: Math.max(60, jams) };
+    if (avgDelaySec) overrides.delay = Math.round(avgDelaySec / 60);
+    applyStats(overrides);
+    gotLiveData = true;
+  } catch(e) {
+    console.warn('TomTom incidents:', e.message);
+  }
+
+  // 2. Flow per route → real congestion %
+  for (const r of ROUTES) {
+    try {
+      const data = await ttFetchFlow(r.lat, r.lon);
+      const f = data.flowSegmentData;
+      if (f && f.freeFlowSpeed > 0) {
+        const cong = Math.round((1 - f.currentSpeed / f.freeFlowSpeed) * 100);
+        r.base = Math.max(0, Math.min(99, cong));
+        applyRoute(r);
+        gotLiveData = true;
+      }
+    } catch(e) {
+      console.warn(`TomTom flow ${r.name}:`, e.message);
+    }
+  }
+
+  setDataSource(gotLiveData);
+}
+
+// Load immediately, then every 5 min
+loadTomTomData();
+setInterval(loadTomTomData, TT_REFRESH);
+
+// ── SHAME COUNTER (~800,000 hrs/day lost in traffic nationally) ──
 const yearStart = new Date(new Date().getFullYear(), 0, 1);
-const RATE_PER_SEC = 800000 / 86400;
-
+const SHAME_RATE = 800000 / 86400;
 function updateShame() {
-  const elapsed = (Date.now() - yearStart.getTime()) / 1000;
-  const total = Math.round(elapsed * RATE_PER_SEC);
+  const total = Math.round((Date.now() - yearStart) / 1000 * SHAME_RATE);
   document.getElementById('shameNum').textContent = total.toLocaleString('he-IL');
 }
 updateShame();
@@ -460,8 +527,7 @@ setInterval(updateShame, 1000);
 
 // ── CLOCK ──
 function updateClock() {
-  const now = new Date();
-  const pad = n => String(n).padStart(2,'0');
+  const now = new Date(), pad = n => String(n).padStart(2,'0');
   document.getElementById('clock').textContent =
     `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 }
@@ -477,11 +543,10 @@ const TICKER_ITEMS = [
   { text:'פקק בכניסה לתל אביב מכיוון דרום', sev:'med' },
   { text:'הצטברות בצומת לה-גרדיה — 30 דקות עיכוב', sev:'med' },
   { text:'מחלף קסם חסום — 25 דקות לצפון', sev:'high' },
-  { text:'כביש 6 עצירות — צמצום נתיבים בגלל עבודות', sev:'med' },
+  { text:'כביש 6 עצירות — צמצום נתיבים', sev:'med' },
   { text:'איילון דרום מדרג אדום — 18 ק"מ פקוק', sev:'high' },
   { text:'מחלף השלום — עצור', sev:'high' },
 ];
-
 const tw = document.getElementById('tickerWrap');
 [...TICKER_ITEMS, ...TICKER_ITEMS].forEach(item => {
   const sp = document.createElement('span');
