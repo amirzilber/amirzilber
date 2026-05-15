@@ -4,220 +4,164 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>מפת ההצלחות של מירי רגב | שרת התחבורה</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-
 :root {
-  --red:       #e03030;
-  --red-dark:  #a01818;
-  --orange:    #e67e22;
-  --yellow:    #f1c40f;
-  --green:     #27ae60;
-  --bg:        #0e0e0e;
-  --panel:     #161616;
-  --card:      #1e1e1e;
-  --border:    #2a2a2a;
-  --text:      #f0f0f0;
-  --muted:     #888;
-  --accent:    #ff4444;
+  --red:#e03030; --orange:#e67e22; --yellow:#f1c40f; --green:#27ae60;
+  --bg:#0e0e0e; --panel:#161616; --card:#1e1e1e; --border:#2a2a2a;
+  --text:#f0f0f0; --muted:#888; --accent:#ff4444;
 }
+html,body { height:100%; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif; background:var(--bg); color:var(--text); overflow:hidden; }
 
-html, body { height:100%; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif; background:var(--bg); color:var(--text); overflow:hidden; }
-
-/* ── PAGE SHELL ── */
+/* PAGE */
 .page { display:flex; flex-direction:column; height:100vh; }
 
-/* ── HEADER ── */
+/* HEADER */
 header {
-  background: linear-gradient(135deg,#140000 0%,#200404 50%,#140000 100%);
-  border-bottom:2px solid var(--red);
-  padding:10px 16px;
-  flex-shrink:0;
-  position:relative;
-  overflow:hidden;
+  background:linear-gradient(135deg,#140000 0%,#200404 50%,#140000 100%);
+  border-bottom:2px solid var(--red); padding:10px 16px; flex-shrink:0;
+  position:relative; overflow:hidden;
 }
-header::after {
-  content:'';
-  position:absolute; inset:0;
-  background:repeating-linear-gradient(45deg,transparent,transparent 14px,rgba(224,48,48,.03) 14px,rgba(224,48,48,.03) 28px);
-  pointer-events:none;
-}
+header::after { content:''; position:absolute; inset:0; background:repeating-linear-gradient(45deg,transparent,transparent 14px,rgba(224,48,48,.03) 14px,rgba(224,48,48,.03) 28px); pointer-events:none; }
 .header-inner { position:relative; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
 .logo { font-size:clamp(1rem,2.4vw,1.7rem); font-weight:900; color:#fff; text-shadow:0 0 24px rgba(224,48,48,.8); line-height:1.15; flex:1; min-width:200px; }
 .logo .blink { animation:blink 2.5s ease-in-out infinite; color:var(--red); }
 @keyframes blink { 0%,90%,100%{opacity:1} 95%{opacity:.2} }
-.logo .sub { display:block; font-size:.58em; font-weight:400; color:#ff9999; margin-top:2px; letter-spacing:.02em; }
-
+.logo .sub { display:block; font-size:.58em; font-weight:400; color:#ff9999; margin-top:2px; }
 .header-right { display:flex; align-items:center; gap:10px; }
 .live-badge { display:flex; align-items:center; gap:6px; background:rgba(224,48,48,.15); border:1px solid rgba(224,48,48,.4); border-radius:20px; padding:4px 12px; font-size:.72rem; font-weight:700; color:#ff6666; }
 .live-dot { width:8px; height:8px; border-radius:50%; background:var(--red); animation:livePulse 1.2s ease-in-out infinite; flex-shrink:0; }
 @keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.6)} }
 .clock { font-size:.9rem; font-weight:700; color:#ccc; letter-spacing:.08em; font-variant-numeric:tabular-nums; min-width:62px; text-align:center; }
 
-/* ── TICKER ── */
+/* TICKER */
 .ticker-bar { background:var(--red); flex-shrink:0; overflow:hidden; padding:5px 0; cursor:default; }
 .ticker-wrap { display:flex; white-space:nowrap; animation:tickerScroll 50s linear infinite; }
 .ticker-wrap:hover { animation-play-state:paused; }
 .t-item { padding:0 36px; font-size:.78rem; font-weight:600; color:#fff; flex-shrink:0; }
-.t-item::before { content:'⚠ '; }
 .t-sev-high::before { content:'🔴 '; }
 .t-sev-med::before  { content:'🟠 '; }
 @keyframes tickerScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
 
-/* ── MAIN BODY ── */
+/* MAIN */
 .main { display:flex; flex:1; min-height:0; overflow:hidden; }
 
-/* ── SIDEBAR ── */
-.sidebar {
-  width:300px; flex-shrink:0;
-  background:var(--panel);
-  border-left:1px solid var(--border);
-  display:flex; flex-direction:column;
-  overflow-y:auto; overflow-x:hidden;
-}
+/* SIDEBAR */
+.sidebar { width:290px; flex-shrink:0; background:var(--panel); border-left:1px solid var(--border); display:flex; flex-direction:column; overflow-y:auto; overflow-x:hidden; }
 .sidebar::-webkit-scrollbar { width:4px; }
-.sidebar::-webkit-scrollbar-track { background:transparent; }
 .sidebar::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
-
-.section-title {
-  font-size:.65rem; font-weight:700; color:var(--muted);
-  letter-spacing:.12em; text-transform:uppercase;
-  padding:12px 14px 6px;
-  border-top:1px solid var(--border);
-}
-.section-title:first-child { border-top:none; }
+.sec-title { font-size:.62rem; font-weight:700; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; padding:12px 14px 6px; border-top:1px solid var(--border); }
+.sec-title:first-child { border-top:none; }
 
 /* STAT CARDS */
 .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:0 10px 10px; }
-.stat-card {
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:10px 10px 8px;
-  position:relative; overflow:hidden;
-  transition:border-color .2s,transform .15s;
-  cursor:default;
-}
+.stat-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:10px 10px 8px; position:relative; overflow:hidden; transition:border-color .2s,transform .15s; cursor:default; }
 .stat-card:hover { border-color:rgba(224,48,48,.5); transform:translateY(-1px); }
-.stat-card::before {
-  content:'';
-  position:absolute; top:0; left:0; right:0; height:2px;
-  background:var(--card-accent,var(--red));
-}
-.stat-icon { font-size:1.2rem; margin-bottom:4px; }
-.stat-num {
-  font-size:1.35rem; font-weight:800; color:#fff;
-  font-variant-numeric:tabular-nums;
-  line-height:1;
-  transition:color .3s;
-}
+.stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--card-accent,var(--red)); }
+.stat-icon { font-size:1.1rem; margin-bottom:3px; }
+.stat-num { font-size:1.3rem; font-weight:800; color:#fff; font-variant-numeric:tabular-nums; line-height:1; transition:color .3s; }
 .stat-num.flash { color:var(--red) !important; }
-.stat-unit { font-size:.6rem; color:var(--muted); }
-.stat-label { font-size:.6rem; color:#aaa; margin-top:3px; line-height:1.3; }
+.stat-unit { font-size:.58rem; color:var(--muted); }
+.stat-label { font-size:.58rem; color:#aaa; margin-top:3px; line-height:1.3; }
 
-/* SHAME COUNTER */
-.shame-box {
-  margin:0 10px 10px;
-  background:linear-gradient(135deg,#1a0000,#220404);
-  border:1px solid rgba(224,48,48,.35);
-  border-radius:10px;
-  padding:10px 12px;
-  text-align:center;
-  position:relative; overflow:hidden;
-}
-.shame-box::before { content:''; position:absolute;inset:0; background:radial-gradient(ellipse at 50% 0%,rgba(224,48,48,.12) 0%,transparent 70%); pointer-events:none; }
-.shame-label { font-size:.6rem; color:#ff9999; font-weight:600; letter-spacing:.04em; margin-bottom:4px; }
-.shame-num { font-size:1.5rem; font-weight:900; color:#fff; font-variant-numeric:tabular-nums; text-shadow:0 0 20px rgba(224,48,48,.6); letter-spacing:.04em; }
-.shame-sub { font-size:.55rem; color:var(--muted); margin-top:2px; }
+/* SHAME BOX */
+.shame-box { margin:0 10px 10px; background:linear-gradient(135deg,#1a0000,#220404); border:1px solid rgba(224,48,48,.35); border-radius:10px; padding:10px 12px; text-align:center; position:relative; overflow:hidden; }
+.shame-box::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 0%,rgba(224,48,48,.12) 0%,transparent 70%); pointer-events:none; }
+.shame-label { font-size:.58rem; color:#ff9999; font-weight:600; letter-spacing:.04em; margin-bottom:4px; }
+.shame-num { font-size:1.4rem; font-weight:900; color:#fff; font-variant-numeric:tabular-nums; text-shadow:0 0 20px rgba(224,48,48,.6); }
+.shame-sub { font-size:.52rem; color:var(--muted); margin-top:2px; }
 
 /* ROUTE BARS */
-.routes { padding:0 10px 10px; display:flex; flex-direction:column; gap:7px; }
-.route-row { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:8px 10px; }
+.routes { padding:0 10px 10px; display:flex; flex-direction:column; gap:6px; }
+.route-row { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:8px 10px; cursor:pointer; transition:border-color .2s; }
+.route-row:hover { border-color:rgba(255,255,255,.15); }
+.route-row.tracked { border-color:rgba(255,255,255,.25); }
 .route-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; }
-.route-name { font-size:.72rem; font-weight:600; color:var(--text); }
-.route-pct  { font-size:.68rem; font-weight:700; font-variant-numeric:tabular-nums; }
+.route-name { font-size:.7rem; font-weight:600; color:var(--text); }
+.route-pct  { font-size:.66rem; font-weight:700; font-variant-numeric:tabular-nums; }
 .route-bar-bg { height:5px; background:#2a2a2a; border-radius:3px; overflow:hidden; }
 .route-bar-fill { height:100%; border-radius:3px; transition:width 1.5s cubic-bezier(.4,0,.2,1); }
-.route-status { font-size:.55rem; color:var(--muted); margin-top:3px; }
+.route-status { font-size:.53rem; color:var(--muted); margin-top:3px; }
+.track-hint { font-size:.52rem; color:#555; margin-top:2px; }
 
 /* CITY BUTTONS */
 .city-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; padding:0 10px 10px; }
-.city-btn {
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:8px;
-  padding:7px 6px;
-  font-size:.7rem; font-weight:600;
-  color:var(--text);
-  cursor:pointer;
-  text-align:center;
-  transition:all .18s;
-  font-family:inherit;
-}
-.city-btn:hover  { border-color:rgba(224,48,48,.6); background:#282828; color:#fff; }
+.city-btn { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:7px 6px; font-size:.68rem; font-weight:600; color:var(--text); cursor:pointer; text-align:center; transition:all .18s; font-family:inherit; }
+.city-btn:hover  { border-color:rgba(224,48,48,.6); background:#282828; }
 .city-btn.active { border-color:var(--red); background:rgba(224,48,48,.12); color:#ff8888; }
 
 /* SHARE */
 .share-row { display:flex; gap:6px; padding:0 10px 12px; }
-.share-btn {
-  flex:1; display:flex; align-items:center; justify-content:center; gap:5px;
-  background:var(--card); border:1px solid var(--border);
-  border-radius:8px; padding:7px 4px;
-  font-size:.65rem; font-weight:600; color:var(--text);
-  cursor:pointer; transition:all .18s; font-family:inherit;
-  text-decoration:none;
-}
-.share-btn.wa  { --h:#25d366; }
-.share-btn.x   { --h:#1d9bf0; }
-.share-btn.cp  { --h:#888; }
+.share-btn { flex:1; display:flex; align-items:center; justify-content:center; gap:5px; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:7px 4px; font-size:.63rem; font-weight:600; color:var(--text); cursor:pointer; transition:all .18s; font-family:inherit; text-decoration:none; }
+.share-btn.wa { --h:#25d366; }
+.share-btn.x  { --h:#1d9bf0; }
+.share-btn.cp { --h:#888; }
 .share-btn:hover { border-color:var(--h,var(--red)); color:var(--h,#fff); }
-.share-btn .si { font-size:.85rem; }
 
-/* ── MAP ── */
-.map-wrap { flex:1; position:relative; min-width:0; }
-.map-wrap iframe { width:100%; height:100%; border:none; display:block; }
-.map-badge {
-  position:absolute; top:10px; left:10px;
-  background:rgba(0,0,0,.72); border:1px solid rgba(224,48,48,.5);
-  border-radius:8px; padding:6px 12px;
-  font-size:.7rem; color:#ff8888;
-  pointer-events:none; backdrop-filter:blur(6px);
-  z-index:10;
-}
+/* CONTENT AREA */
+.content-area { flex:1; display:flex; flex-direction:column; min-width:0; }
 
-/* ── FOOTER ── */
-footer {
-  background:#0a0a0a; border-top:1px solid var(--border);
-  padding:5px 16px; flex-shrink:0;
-  display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
-}
+/* VIEW TABS */
+.view-tabs { display:flex; gap:0; flex-shrink:0; background:#111; border-bottom:1px solid var(--border); }
+.tab-btn { flex:1; padding:9px 12px; font-size:.78rem; font-weight:700; color:var(--muted); background:transparent; border:none; cursor:pointer; transition:all .2s; font-family:inherit; border-bottom:2px solid transparent; }
+.tab-btn:hover { color:var(--text); background:rgba(255,255,255,.04); }
+.tab-btn.active { color:#fff; border-bottom-color:var(--red); background:rgba(224,48,48,.08); }
+
+/* VIEWS */
+.view { display:none; flex:1; min-height:0; position:relative; }
+.view.active { display:flex; flex-direction:column; }
+
+/* MAP VIEW */
+#mapView iframe { width:100%; height:100%; border:none; display:block; }
+.map-badge { position:absolute; top:10px; left:10px; background:rgba(0,0,0,.72); border:1px solid rgba(224,48,48,.5); border-radius:8px; padding:6px 12px; font-size:.7rem; color:#ff8888; pointer-events:none; backdrop-filter:blur(6px); z-index:10; }
+
+/* CHARTS VIEW */
+#chartsView { background:var(--bg); overflow:hidden; }
+.chart-toolbar { display:flex; align-items:center; gap:8px; padding:10px 16px; flex-shrink:0; flex-wrap:wrap; border-bottom:1px solid var(--border); background:var(--panel); }
+.chart-toolbar-label { font-size:.65rem; color:var(--muted); font-weight:600; letter-spacing:.08em; text-transform:uppercase; flex-shrink:0; }
+.road-toggle { display:flex; align-items:center; gap:5px; padding:5px 10px; border-radius:20px; border:2px solid transparent; cursor:pointer; font-size:.7rem; font-weight:700; background:var(--card); color:var(--muted); transition:all .2s; font-family:inherit; }
+.road-toggle.on { color:#fff; }
+.road-toggle .dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+.chart-actions { margin-right:auto; display:flex; gap:6px; }
+.chart-action-btn { padding:4px 10px; background:var(--card); border:1px solid var(--border); border-radius:6px; font-size:.65rem; color:var(--muted); cursor:pointer; font-family:inherit; transition:all .18s; }
+.chart-action-btn:hover { color:var(--text); border-color:rgba(255,255,255,.2); }
+
+.chart-wrap { flex:1; position:relative; padding:12px 16px; min-height:0; }
+.chart-wrap canvas { width:100%!important; height:100%!important; }
+
+.road-stat-cards { display:flex; gap:8px; padding:0 16px 12px; flex-wrap:wrap; flex-shrink:0; }
+.rs-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:8px 12px; display:flex; align-items:center; gap:8px; min-width:130px; flex:1; transition:border-color .3s; }
+.rs-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.rs-body { flex:1; min-width:0; }
+.rs-name { font-size:.62rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.rs-val  { font-size:1rem; font-weight:800; font-variant-numeric:tabular-nums; }
+.rs-speed { font-size:.58rem; color:var(--muted); margin-top:1px; }
+.rs-trend { font-size:1rem; flex-shrink:0; }
+
+/* FOOTER */
+footer { background:#0a0a0a; border-top:1px solid var(--border); padding:5px 16px; flex-shrink:0; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
 .footer-text { font-size:.65rem; color:var(--muted); }
 .footer-text strong { color:#ff8888; }
 .footer-sig { font-size:.6rem; color:#444; }
 
-/* ── TOAST ── */
-.toast {
-  position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(80px);
-  background:#222; border:1px solid var(--border); border-radius:10px;
-  padding:8px 20px; font-size:.78rem; color:var(--text);
-  transition:transform .3s ease; z-index:999; pointer-events:none;
-  white-space:nowrap;
-}
+/* TOAST */
+.toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(80px); background:#222; border:1px solid var(--border); border-radius:10px; padding:8px 20px; font-size:.78rem; color:var(--text); transition:transform .3s; z-index:999; pointer-events:none; white-space:nowrap; }
 .toast.show { transform:translateX(-50%) translateY(0); }
 
-/* ── MOBILE ── */
+/* MOBILE */
 @media(max-width:750px){
   html,body{overflow:auto}
-  .page{height:auto; overflow:visible}
+  .page{height:auto;overflow:visible}
   .main{flex-direction:column}
-  .sidebar{width:100%; border-left:none; border-bottom:1px solid var(--border); overflow-y:visible;}
-  .stat-grid{grid-template-columns:repeat(4,1fr); gap:6px;}
+  .sidebar{width:100%;border-left:none;border-bottom:1px solid var(--border);overflow-y:visible;}
+  .stat-grid{grid-template-columns:repeat(4,1fr);gap:6px;}
   .stat-card{padding:8px 6px 6px;}
   .stat-num{font-size:1rem;}
   .city-grid{grid-template-columns:repeat(3,1fr);}
-  .routes{display:grid; grid-template-columns:1fr 1fr; gap:6px;}
-  .map-wrap{height:55vmax; flex:none;}
-  footer{padding:4px 12px;}
+  .routes{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+  .content-area{height:70vmax;}
+  .road-stat-cards{flex-wrap:nowrap;overflow-x:auto;}
 }
 @media(max-width:420px){
   .stat-grid{grid-template-columns:1fr 1fr;}
@@ -251,8 +195,7 @@ footer {
 
   <!-- SIDEBAR -->
   <div class="sidebar">
-
-    <div class="section-title">📊 מצב הכבישים עכשיו</div>
+    <div class="sec-title">📊 מצב הכבישים עכשיו</div>
     <div class="stat-grid">
       <div class="stat-card" style="--card-accent:#e03030">
         <div class="stat-icon">🚗</div>
@@ -280,42 +223,63 @@ footer {
       </div>
     </div>
 
-    <div class="section-title">😱 מונה הבזבוז הלאומי</div>
+    <div class="sec-title">😱 מונה הבזבוז הלאומי</div>
     <div class="shame-box">
       <div class="shame-label">שעות חיים שאבדו בפקק מתחילת השנה</div>
       <div class="shame-num" id="shameNum">0</div>
-      <div class="shame-sub">מתעדכן בזמן אמת • בסיס: ~800,000 שעות/יום</div>
+      <div class="shame-sub">~816,667 שעות/יום • 3.5M רכבים × 7 דקות עיכוב ממוצע</div>
     </div>
 
-    <div class="section-title">🛣️ עומס לפי כביש</div>
+    <div class="sec-title">🛣️ עומס לפי כביש — לחץ למעקב 📈</div>
     <div class="routes" id="routesList"></div>
 
-    <div class="section-title">🗺️ ניווט מהיר</div>
+    <div class="sec-title">🗺️ ניווט מהיר</div>
     <div class="city-grid" id="cityGrid"></div>
 
-    <div class="section-title">📤 שתפו את מפת הבושה</div>
+    <div class="sec-title">📤 שתפו את מפת הבושה</div>
     <div class="share-row">
-      <a class="share-btn wa" id="shareWa" href="#" target="_blank" rel="noopener">
-        <span class="si">💬</span>WhatsApp
-      </a>
-      <a class="share-btn x" id="shareX" href="#" target="_blank" rel="noopener">
-        <span class="si">🐦</span>X
-      </a>
-      <button class="share-btn cp" onclick="copyLink()">
-        <span class="si">🔗</span>העתק
-      </button>
+      <a class="share-btn wa" id="shareWa" href="#" target="_blank" rel="noopener"><span>💬</span>WhatsApp</a>
+      <a class="share-btn x"  id="shareX"  href="#" target="_blank" rel="noopener"><span>🐦</span>X</a>
+      <button class="share-btn cp" onclick="copyLink()"><span>🔗</span>העתק</button>
+    </div>
+  </div>
+
+  <!-- CONTENT AREA -->
+  <div class="content-area">
+
+    <!-- TABS -->
+    <div class="view-tabs">
+      <button class="tab-btn active" data-view="mapView">🗺️ מפה חיה</button>
+      <button class="tab-btn" data-view="chartsView">📈 גרפי כבישים</button>
+    </div>
+
+    <!-- MAP VIEW -->
+    <div id="mapView" class="view active">
+      <iframe id="wazeMap"
+        src="https://embed.waze.com/iframe?zoom=8&lat=31.77&lon=34.99&ct=livemap&pin=0"
+        allowfullscreen loading="lazy" title="מפת תנועה חיה"></iframe>
+      <div class="map-badge"><div class="live-dot" style="display:inline-block;margin-left:6px;vertical-align:middle;"></div> מפת תנועה חיה — Waze</div>
+    </div>
+
+    <!-- CHARTS VIEW -->
+    <div id="chartsView" class="view">
+      <div class="chart-toolbar">
+        <span class="chart-toolbar-label">מעקב:</span>
+        <div id="roadToggles"></div>
+        <div class="chart-actions">
+          <button class="chart-action-btn" onclick="setRange(30)">30 דק׳</button>
+          <button class="chart-action-btn" onclick="setRange(60)">שעה</button>
+          <button class="chart-action-btn" onclick="setRange(120)">2 שעות</button>
+          <button class="chart-action-btn" id="refreshBtn" onclick="forceRefresh()">🔄 רענן</button>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="trafficChart"></canvas>
+      </div>
+      <div class="road-stat-cards" id="roadStatCards"></div>
     </div>
 
   </div>
-
-  <!-- MAP -->
-  <div class="map-wrap">
-    <iframe id="wazeMap"
-      src="https://embed.waze.com/iframe?zoom=8&lat=31.77&lon=34.99&ct=livemap&pin=0"
-      allowfullscreen loading="lazy" title="מפת תנועה חיה"></iframe>
-    <div class="map-badge"><div class="live-dot" style="display:inline-block;margin-left:6px;vertical-align:middle"></div> מפת תנועה חיה — Waze</div>
-  </div>
-
 </div>
 
 <!-- FOOTER -->
@@ -328,43 +292,62 @@ footer {
 <div class="toast" id="toast">הקישור הועתק! 🔗</div>
 
 <script>
-// ── TOMTOM CONFIG ──
+// ══════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════
 const TT_KEY = 'bpjqLbkLxkHewEI1lTGmwfLQLFY0vRLB';
-const TT_REFRESH = 5 * 60 * 1000; // every 5 min → ~2,016 API calls/day (under 2,500 free limit)
+const TT_REFRESH_MS = 5 * 60 * 1000;
+const HISTORY_POINTS = 24; // keep last 24 readings (2hrs at 5min intervals)
 
-// ── CITIES ──
-const CITIES = [
-  { label:'🗺️ כל הארץ', zoom:8,  lat:31.77, lon:34.99 },
-  { label:'🏙️ גוש דן',  zoom:12, lat:32.08, lon:34.84 },
-  { label:'🏛️ ירושלים', zoom:12, lat:31.78, lon:35.21 },
-  { label:'⚓ חיפה',    zoom:12, lat:32.82, lon:35.00 },
-  { label:'🌵 באר שבע', zoom:12, lat:31.25, lon:34.79 },
-  { label:'🌊 נתניה',   zoom:12, lat:32.33, lon:34.86 },
+// ══════════════════════════════════════════════
+//  TRACKED ROADS (used for both sidebar bars + chart)
+// ══════════════════════════════════════════════
+const ROADS = [
+  { id:'r1',  name:'כביש 1',  short:'כ׳1',  lat:31.868, lon:34.967, color:'#e74c3c', base:74 },
+  { id:'r2',  name:'כביש 2',  short:'כ׳2',  lat:32.167, lon:34.838, color:'#e67e22', base:60 },
+  { id:'r4',  name:'כביש 4',  short:'כ׳4',  lat:32.095, lon:34.883, color:'#f1c40f', base:66 },
+  { id:'r5',  name:'כביש 5',  short:'כ׳5',  lat:32.075, lon:34.950, color:'#a855f7', base:55 },
+  { id:'r6',  name:'כביש 6',  short:'כ׳6',  lat:32.097, lon:34.966, color:'#22c55e', base:38 },
+  { id:'ayl', name:'איילון',  short:'אילון', lat:32.085, lon:34.793, color:'#ff4444', base:91 },
+  { id:'bg',  name:'כביש 20', short:'כ׳20', lat:31.972, lon:34.812, color:'#38bdf8', base:82 },
 ];
-const cityGrid = document.getElementById('cityGrid');
-CITIES.forEach((c, i) => {
-  const btn = document.createElement('button');
-  btn.className = 'city-btn' + (i === 0 ? ' active' : '');
-  btn.textContent = c.label;
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.city-btn').forEach((b,j) => b.classList.toggle('active', j===i));
-    document.getElementById('wazeMap').src =
-      `https://embed.waze.com/iframe?zoom=${c.zoom}&lat=${c.lat}&lon=${c.lon}&ct=livemap&pin=0`;
-  });
-  cityGrid.appendChild(btn);
+
+// roads tracked on chart (default: first 4)
+const trackedSet = new Set(['r1','r2','r6','ayl']);
+
+// speed data per road (from TomTom flow)
+const roadSpeed = {};
+
+// ══════════════════════════════════════════════
+//  HISTORY (time-series for chart)
+// ══════════════════════════════════════════════
+const history = {};
+ROADS.forEach(r => {
+  history[r.id] = { times: [], values: [] };
+  // pre-fill last HISTORY_POINTS readings with realistic noise
+  const now = Date.now();
+  for (let i = HISTORY_POINTS - 1; i >= 0; i--) {
+    const t = new Date(now - i * 5 * 60 * 1000);
+    const noise = (Math.random() - 0.5) * 22;
+    const v = Math.max(5, Math.min(99, r.base + noise));
+    history[r.id].times.push(t);
+    history[r.id].values.push(Math.round(v));
+  }
 });
 
-// ── ROUTES (with real GPS points for flow API) ──
-const ROUTES = [
-  { name:'כביש איילון',           lat:32.085, lon:34.793, base:88 },
-  { name:'כביש 20 (בגין)',        lat:31.972, lon:34.812, base:82 },
-  { name:'כביש 1 (ת"א-ירושלים)',  lat:31.868, lon:34.967, base:74 },
-  { name:'כביש 4',                lat:32.095, lon:34.883, base:66 },
-  { name:'כביש 2 (חוף)',          lat:32.167, lon:34.838, base:60 },
-  { name:'כביש 6',                lat:32.097, lon:34.966, base:38 },
-];
+function pushHistory(roadId, value) {
+  const h = history[roadId];
+  h.times.push(new Date());
+  h.values.push(value);
+  if (h.times.length > HISTORY_POINTS * 3) {
+    h.times.splice(0, 1);
+    h.values.splice(0, 1);
+  }
+}
 
-// ── UI HELPERS ──
+// ══════════════════════════════════════════════
+//  UI HELPERS
+// ══════════════════════════════════════════════
 function congColor(pct) {
   if (pct >= 80) return '#e03030';
   if (pct >= 55) return '#e67e22';
@@ -377,7 +360,10 @@ function congLabel(pct) {
   if (pct >= 35) return 'זרימה איטית';
   return 'נסיעה סבירה';
 }
-function animCount(el, from, to, dur=700) {
+function fmtTime(date) {
+  return `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+}
+function animCount(el, from, to, dur = 700) {
   const start = performance.now(), diff = to - from;
   (function step(now) {
     const t = Math.min(1, (now - start) / dur);
@@ -391,43 +377,226 @@ function setDataSource(live) {
     ? '📡 נתונים חיים — TomTom Traffic API'
     : '⚠ נתוני הדמאה (TomTom לא זמין)';
 }
+function trend(values) {
+  if (values.length < 3) return '→';
+  const last3 = values.slice(-3);
+  const delta = last3[2] - last3[0];
+  if (delta > 5) return '↑';
+  if (delta < -5) return '↓';
+  return '→';
+}
 
-// ── BUILD ROUTE DOM ──
+// ══════════════════════════════════════════════
+//  SIDEBAR ROUTE BARS
+// ══════════════════════════════════════════════
 const routesList = document.getElementById('routesList');
-ROUTES.forEach(r => {
+ROADS.forEach(r => {
   const div = document.createElement('div');
-  div.className = 'route-row';
+  div.className = 'route-row' + (trackedSet.has(r.id) ? ' tracked' : '');
+  div.id = 'rrow-' + r.id;
   div.innerHTML = `
     <div class="route-header">
       <span class="route-name">${r.name}</span>
-      <span class="route-pct" id="rp-${r.name}">—%</span>
+      <span class="route-pct" id="rp-${r.id}">—%</span>
     </div>
-    <div class="route-bar-bg"><div class="route-bar-fill" id="rb-${r.name}" style="width:0%;background:#333"></div></div>
-    <div class="route-status" id="rs-${r.name}">טוען...</div>`;
+    <div class="route-bar-bg"><div class="route-bar-fill" id="rb-${r.id}" style="width:0%;background:#333"></div></div>
+    <div class="route-status" id="rs-${r.id}">טוען...</div>
+    <div class="track-hint" id="rh-${r.id}">${trackedSet.has(r.id) ? '📈 במעקב בגרפים' : 'לחץ להוספה לגרפים'}</div>`;
+  div.addEventListener('click', () => toggleTrack(r.id));
   routesList.appendChild(div);
 });
 
 function applyRoute(r) {
   const pct = r.base, col = congColor(pct);
-  document.getElementById(`rp-${r.name}`).textContent = pct + '%';
-  document.getElementById(`rp-${r.name}`).style.color = col;
-  const bar = document.getElementById(`rb-${r.name}`);
+  document.getElementById(`rp-${r.id}`).textContent = pct + '%';
+  document.getElementById(`rp-${r.id}`).style.color = col;
+  const bar = document.getElementById(`rb-${r.id}`);
   bar.style.width = pct + '%';
   bar.style.background = col;
-  document.getElementById(`rs-${r.name}`).textContent = congLabel(pct);
+  document.getElementById(`rs-${r.id}`).textContent = congLabel(pct);
 }
 
-// Small simulated fluctuation between TomTom refreshes
+// small fluctuation tick
 function tickRoutes() {
-  ROUTES.forEach(r => {
+  ROADS.forEach(r => {
     r.base = Math.max(5, Math.min(99, r.base + Math.floor((Math.random()-.5)*6)));
     applyRoute(r);
   });
+  updateRoadStatCards();
 }
 setTimeout(tickRoutes, 500);
 setInterval(tickRoutes, 10000);
 
-// ── STAT CARDS ──
+// ══════════════════════════════════════════════
+//  TOGGLE TRACKING
+// ══════════════════════════════════════════════
+function toggleTrack(id) {
+  if (trackedSet.has(id)) {
+    trackedSet.delete(id);
+  } else {
+    trackedSet.add(id);
+  }
+  // update sidebar hint
+  ROADS.forEach(r => {
+    const hint = document.getElementById(`rh-${r.id}`);
+    const row  = document.getElementById(`rrow-${r.id}`);
+    const on   = trackedSet.has(r.id);
+    if (hint) hint.textContent = on ? '📈 במעקב בגרפים' : 'לחץ להוספה לגרפים';
+    if (row)  row.classList.toggle('tracked', on);
+  });
+  // update toggle buttons in chart toolbar
+  document.querySelectorAll('.road-toggle').forEach(btn => {
+    const rid = btn.dataset.id;
+    const on  = trackedSet.has(rid);
+    btn.classList.toggle('on', on);
+    const road = ROADS.find(r => r.id === rid);
+    if (road) btn.style.borderColor = on ? road.color : 'transparent';
+  });
+  rebuildChart();
+  updateRoadStatCards();
+}
+
+// ══════════════════════════════════════════════
+//  CHART (Chart.js)
+// ══════════════════════════════════════════════
+let trafficChart = null;
+let currentRange = 60; // minutes
+
+function buildDatasets() {
+  return ROADS
+    .filter(r => trackedSet.has(r.id))
+    .map(r => {
+      const h = history[r.id];
+      const cutoff = Date.now() - currentRange * 60 * 1000;
+      const pairs = h.times.map((t,i) => ({ t, v: h.values[i] })).filter(p => p.t >= cutoff);
+      return {
+        label: r.name,
+        data: pairs.map(p => ({ x: fmtTime(p.t), y: p.v })),
+        borderColor: r.color,
+        backgroundColor: r.color + '22',
+        tension: 0.4,
+        fill: true,
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        borderWidth: 2.5,
+      };
+    });
+}
+
+function buildLabels() {
+  const cutoff = Date.now() - currentRange * 60 * 1000;
+  const allTimes = [];
+  ROADS.filter(r => trackedSet.has(r.id)).forEach(r => {
+    history[r.id].times.forEach(t => { if (t >= cutoff) allTimes.push(t); });
+  });
+  const unique = [...new Set(allTimes.map(fmtTime))].sort();
+  return unique;
+}
+
+function initChart() {
+  const ctx = document.getElementById('trafficChart').getContext('2d');
+  trafficChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: buildLabels(), datasets: buildDatasets() },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          rtl: true,
+          labels: { color: '#ccc', font: { size: 11 }, padding: 14, usePointStyle: true }
+        },
+        tooltip: {
+          rtl: true,
+          backgroundColor: 'rgba(20,20,20,.92)',
+          borderColor: '#333',
+          borderWidth: 1,
+          titleColor: '#fff',
+          bodyColor: '#ccc',
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y}% עומס`,
+            afterLabel: ctx => {
+              const pct = ctx.parsed.y;
+              return ' ' + congLabel(pct);
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color:'#666', font:{size:10}, maxTicksLimit:10 },
+          grid:  { color:'#1f1f1f' },
+        },
+        y: {
+          min: 0, max: 100,
+          ticks: { color:'#666', font:{size:10}, callback: v => v+'%', stepSize:20 },
+          grid:  { color:'#1f1f1f' },
+          title: { display:true, text:'עומס %', color:'#555', font:{size:10} }
+        }
+      },
+      animation: { duration: 400 }
+    }
+  });
+}
+
+function rebuildChart() {
+  if (!trafficChart) return;
+  trafficChart.data.labels   = buildLabels();
+  trafficChart.data.datasets = buildDatasets();
+  trafficChart.update('none');
+}
+
+function setRange(minutes) {
+  currentRange = minutes;
+  rebuildChart();
+}
+
+// ══════════════════════════════════════════════
+//  ROAD TOGGLE BUTTONS (chart toolbar)
+// ══════════════════════════════════════════════
+const toggleContainer = document.getElementById('roadToggles');
+toggleContainer.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;';
+ROADS.forEach(r => {
+  const btn = document.createElement('button');
+  btn.className = 'road-toggle' + (trackedSet.has(r.id) ? ' on' : '');
+  btn.dataset.id = r.id;
+  btn.style.borderColor = trackedSet.has(r.id) ? r.color : 'transparent';
+  btn.innerHTML = `<span class="dot" style="background:${r.color}"></span>${r.name}`;
+  btn.addEventListener('click', () => toggleTrack(r.id));
+  toggleContainer.appendChild(btn);
+});
+
+// ══════════════════════════════════════════════
+//  ROAD STAT CARDS (below chart)
+// ══════════════════════════════════════════════
+function updateRoadStatCards() {
+  const container = document.getElementById('roadStatCards');
+  container.innerHTML = '';
+  ROADS.filter(r => trackedSet.has(r.id)).forEach(r => {
+    const pct   = r.base;
+    const col   = congColor(pct);
+    const tr    = trend(history[r.id].values);
+    const spd   = roadSpeed[r.id] ? `${roadSpeed[r.id]} קמ"ש` : '';
+    const card  = document.createElement('div');
+    card.className = 'rs-card';
+    card.style.borderColor = r.color + '55';
+    card.innerHTML = `
+      <div class="rs-dot" style="background:${r.color}"></div>
+      <div class="rs-body">
+        <div class="rs-name">${r.name}</div>
+        <div class="rs-val" style="color:${col}">${pct}%</div>
+        <div class="rs-speed">${spd ? spd + ' • ' : ''}${congLabel(pct)}</div>
+      </div>
+      <div class="rs-trend">${tr}</div>`;
+    container.appendChild(card);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  STAT CARDS
+// ══════════════════════════════════════════════
 const STAT_CFG = {
   jams:    { el:'s-jams',    base:218, min:100, max:400, step:5  },
   delay:   { el:'s-delay',   base:34,  min:10,  max:60,  step:2  },
@@ -453,71 +622,81 @@ function applyStats(overrides = {}) {
 setTimeout(() => applyStats(), 300);
 setInterval(() => applyStats(), 9000);
 
-// ── TOMTOM API ──
-async function ttFetchIncidents() {
-  // Central Israel bbox (minLon,minLat,maxLon,maxLat) — ~7,000 km², within TomTom limit
-  const bbox = '34.4,31.5,35.6,32.8';
+// ══════════════════════════════════════════════
+//  TOMTOM API
+// ══════════════════════════════════════════════
+async function ttIncidents() {
+  const bbox   = '34.4,31.5,35.6,32.8';
   const fields = encodeURIComponent('{incidents{type,properties{iconCategory,magnitudeOfDelay,delay}}}');
-  const url = `https://api.tomtom.com/traffic/services/5/incidentDetails` +
-    `?key=${TT_KEY}&bbox=${bbox}&fields=${fields}&language=he-IL&t=1111&timeValidityFilter=PRESENT`;
-  const r = await fetch(url);
-  if (!r.ok) throw new Error('incidents ' + r.status);
-  return r.json();
+  const res    = await fetch(
+    `https://api.tomtom.com/traffic/services/5/incidentDetails?key=${TT_KEY}&bbox=${bbox}&fields=${fields}&language=he-IL&t=1111&timeValidityFilter=PRESENT`
+  );
+  if (!res.ok) throw new Error('incidents ' + res.status);
+  return res.json();
 }
 
-async function ttFetchFlow(lat, lon) {
-  const url = `https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json` +
-    `?point=${lat},${lon}&key=${TT_KEY}`;
-  const r = await fetch(url);
-  if (!r.ok) throw new Error('flow ' + r.status);
-  return r.json();
+async function ttFlow(lat, lon) {
+  const res = await fetch(
+    `https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?point=${lat},${lon}&key=${TT_KEY}`
+  );
+  if (!res.ok) throw new Error('flow ' + res.status);
+  return res.json();
 }
 
 async function loadTomTomData() {
-  let gotLiveData = false;
+  let gotLive = false;
 
-  // 1. Incidents → update jams count + avg delay
+  // incidents
   try {
-    const data = await ttFetchIncidents();
+    const data = await ttIncidents();
     const incidents = data.incidents || [];
-    const jams    = incidents.filter(i => [6,7,8].includes(i.properties?.iconCategory)).length;
-    const delays  = incidents.map(i => i.properties?.delay).filter(d => d > 0);
-    const avgDelaySec = delays.length ? delays.reduce((a,b)=>a+b,0)/delays.length : null;
-
+    const jams  = incidents.filter(i => [6,7,8].includes(i.properties?.iconCategory)).length;
+    const delays = incidents.map(i => i.properties?.delay).filter(d => d > 0);
+    const avgMin = delays.length ? Math.round(delays.reduce((a,b)=>a+b,0)/delays.length/60) : null;
     const overrides = { jams: Math.max(60, jams) };
-    if (avgDelaySec) overrides.delay = Math.round(avgDelaySec / 60);
+    if (avgMin) overrides.delay = avgMin;
     applyStats(overrides);
-    gotLiveData = true;
-  } catch(e) {
-    console.warn('TomTom incidents:', e.message);
-  }
+    gotLive = true;
+  } catch(e) { console.warn('TomTom incidents:', e.message); }
 
-  // 2. Flow per route → real congestion %
-  for (const r of ROUTES) {
+  // flow per road
+  for (const r of ROADS) {
     try {
-      const data = await ttFetchFlow(r.lat, r.lon);
-      const f = data.flowSegmentData;
+      const data = await ttFlow(r.lat, r.lon);
+      const f    = data.flowSegmentData;
       if (f && f.freeFlowSpeed > 0) {
         const cong = Math.round((1 - f.currentSpeed / f.freeFlowSpeed) * 100);
-        r.base = Math.max(0, Math.min(99, cong));
+        r.base     = Math.max(0, Math.min(99, cong));
+        roadSpeed[r.id] = Math.round(f.currentSpeed);
         applyRoute(r);
-        gotLiveData = true;
+        pushHistory(r.id, r.base);
+        gotLive = true;
       }
-    } catch(e) {
-      console.warn(`TomTom flow ${r.name}:`, e.message);
-    }
+    } catch(e) { console.warn(`TomTom flow ${r.name}:`, e.message); }
   }
 
-  setDataSource(gotLiveData);
+  rebuildChart();
+  updateRoadStatCards();
+  setDataSource(gotLive);
 }
 
-// Load immediately, then every 5 min
-loadTomTomData();
-setInterval(loadTomTomData, TT_REFRESH);
+async function forceRefresh() {
+  const btn = document.getElementById('refreshBtn');
+  btn.textContent = '⏳ טוען...';
+  btn.disabled = true;
+  await loadTomTomData();
+  btn.textContent = '🔄 רענן';
+  btn.disabled = false;
+}
 
-// ── SHAME COUNTER (~800,000 hrs/day lost in traffic nationally) ──
-const yearStart = new Date(new Date().getFullYear(), 0, 1);
-const SHAME_RATE = 800000 / 86400;
+loadTomTomData();
+setInterval(loadTomTomData, TT_REFRESH_MS);
+
+// ══════════════════════════════════════════════
+//  SHAME COUNTER
+// ══════════════════════════════════════════════
+const yearStart  = new Date(new Date().getFullYear(), 0, 1);
+const SHAME_RATE = 816667 / 86400;
 function updateShame() {
   const total = Math.round((Date.now() - yearStart) / 1000 * SHAME_RATE);
   document.getElementById('shameNum').textContent = total.toLocaleString('he-IL');
@@ -525,7 +704,9 @@ function updateShame() {
 updateShame();
 setInterval(updateShame, 1000);
 
-// ── CLOCK ──
+// ══════════════════════════════════════════════
+//  CLOCK
+// ══════════════════════════════════════════════
 function updateClock() {
   const now = new Date(), pad = n => String(n).padStart(2,'0');
   document.getElementById('clock').textContent =
@@ -534,7 +715,9 @@ function updateClock() {
 updateClock();
 setInterval(updateClock, 1000);
 
-// ── TICKER ──
+// ══════════════════════════════════════════════
+//  TICKER
+// ══════════════════════════════════════════════
 const TICKER_ITEMS = [
   { text:'פקק כבד בכביש 1 לכיוון ירושלים — 45 דקות עיכוב', sev:'high' },
   { text:'תאונה בצומת גלילות — עצור לחלוטין', sev:'high' },
@@ -555,10 +738,56 @@ const tw = document.getElementById('tickerWrap');
   tw.appendChild(sp);
 });
 
-// ── SHARE ──
-const PAGE_URL = 'https://amirzilber.github.io/amirzilber/';
-const SHARE_TEXT = '🚗 מפת ההצלחות של מירי רגב — ראו בעצמכם את מצב הכבישים בישראל בזמן אמת';
+// ══════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.view).classList.add('active');
+    if (btn.dataset.view === 'chartsView' && !trafficChart) {
+      initChart();
+      updateRoadStatCards();
+    } else if (btn.dataset.view === 'chartsView') {
+      rebuildChart();
+      updateRoadStatCards();
+    }
+  });
+});
 
+// ══════════════════════════════════════════════
+//  CITIES
+// ══════════════════════════════════════════════
+const CITIES = [
+  { label:'🗺️ כל הארץ', zoom:8,  lat:31.77, lon:34.99 },
+  { label:'🏙️ גוש דן',  zoom:12, lat:32.08, lon:34.84 },
+  { label:'🏛️ ירושלים', zoom:12, lat:31.78, lon:35.21 },
+  { label:'⚓ חיפה',    zoom:12, lat:32.82, lon:35.00 },
+  { label:'🌵 באר שבע', zoom:12, lat:31.25, lon:34.79 },
+  { label:'🌊 נתניה',   zoom:12, lat:32.33, lon:34.86 },
+];
+const cityGrid = document.getElementById('cityGrid');
+CITIES.forEach((c, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'city-btn' + (i === 0 ? ' active' : '');
+  btn.textContent = c.label;
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.city-btn').forEach((b,j) => b.classList.toggle('active', j===i));
+    document.getElementById('wazeMap').src =
+      `https://embed.waze.com/iframe?zoom=${c.zoom}&lat=${c.lat}&lon=${c.lon}&ct=livemap&pin=0`;
+    // switch to map tab if on charts
+    document.querySelector('[data-view="mapView"]').click();
+  });
+  cityGrid.appendChild(btn);
+});
+
+// ══════════════════════════════════════════════
+//  SHARE
+// ══════════════════════════════════════════════
+const PAGE_URL   = 'https://amirzilber.github.io/amirzilber/';
+const SHARE_TEXT = '🚗 מפת ההצלחות של מירי רגב — ראו בעצמכם את מצב הכבישים בישראל בזמן אמת';
 document.getElementById('shareWa').href =
   'https://wa.me/?text=' + encodeURIComponent(SHARE_TEXT + '\n' + PAGE_URL);
 document.getElementById('shareX').href =
