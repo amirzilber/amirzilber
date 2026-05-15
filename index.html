@@ -2,394 +2,353 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>שעון עצר</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מפת ההצלחות של מירי רגב | שרת התחבורה</title>
     <style>
         * {
             margin: 0;
             padding: 0;
-            -webkit-box-sizing: border-box;
             box-sizing: border-box;
         }
 
+        :root {
+            --red: #c0392b;
+            --dark-red: #922b21;
+            --orange: #e67e22;
+            --dark: #1a1a1a;
+            --darker: #111111;
+            --text: #f0f0f0;
+            --muted: #aaaaaa;
+            --border: #333333;
+        }
+
         html, body {
-            width: 100%;
             height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: var(--darker);
+            color: var(--text);
             overflow: hidden;
         }
 
-        body {
-            min-height: 100vh;
-            min-height: -webkit-fill-available;
-            display: -webkit-flex;
+        /* ===== LAYOUT ===== */
+        .page {
             display: flex;
-            -webkit-flex-direction: column;
             flex-direction: column;
-            -webkit-align-items: center;
-            align-items: center;
-            -webkit-justify-content: center;
-            justify-content: center;
-            background: -webkit-linear-gradient(315deg, #ffe0ec 0%, #ffc2d9 30%, #ffb3d0 60%, #ffd6e7 100%);
-            background: linear-gradient(135deg, #ffe0ec 0%, #ffc2d9 30%, #ffb3d0 60%, #ffd6e7 100%);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            position: relative;
-            -webkit-tap-highlight-color: transparent;
+            height: 100vh;
         }
 
-        .balloons-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
+        /* ===== HEADER ===== */
+        header {
+            background: linear-gradient(135deg, #1a0000 0%, #2d0404 40%, #1a0000 100%);
+            border-bottom: 3px solid var(--red);
+            padding: 10px 20px;
+            flex-shrink: 0;
+            position: relative;
             overflow: hidden;
         }
 
-        .balloon {
+        header::before {
+            content: '';
             position: absolute;
-            bottom: -160px;
-            will-change: transform, opacity;
-            -webkit-animation: floatUp linear infinite;
-            animation: floatUp linear infinite;
-            z-index: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(192, 57, 43, 0.04) 10px,
+                rgba(192, 57, 43, 0.04) 20px
+            );
         }
 
-        @-webkit-keyframes floatUp {
-            0% {
-                -webkit-transform: translateY(0) translateX(0) rotate(0deg);
-                transform: translateY(0) translateX(0) rotate(0deg);
-                opacity: 0.85;
-            }
-            25% {
-                -webkit-transform: translateY(-25vh) translateX(15px) rotate(3deg);
-                transform: translateY(-25vh) translateX(15px) rotate(3deg);
-            }
-            50% {
-                -webkit-transform: translateY(-50vh) translateX(-10px) rotate(-2deg);
-                transform: translateY(-50vh) translateX(-10px) rotate(-2deg);
-            }
-            75% {
-                -webkit-transform: translateY(-75vh) translateX(12px) rotate(2deg);
-                transform: translateY(-75vh) translateX(12px) rotate(2deg);
-            }
-            100% {
-                -webkit-transform: translateY(-120vh) translateX(-8px) rotate(-1deg);
-                transform: translateY(-120vh) translateX(-8px) rotate(-1deg);
-                opacity: 0.2;
-            }
-        }
-
-        @keyframes floatUp {
-            0% {
-                -webkit-transform: translateY(0) translateX(0) rotate(0deg);
-                transform: translateY(0) translateX(0) rotate(0deg);
-                opacity: 0.85;
-            }
-            25% {
-                -webkit-transform: translateY(-25vh) translateX(15px) rotate(3deg);
-                transform: translateY(-25vh) translateX(15px) rotate(3deg);
-            }
-            50% {
-                -webkit-transform: translateY(-50vh) translateX(-10px) rotate(-2deg);
-                transform: translateY(-50vh) translateX(-10px) rotate(-2deg);
-            }
-            75% {
-                -webkit-transform: translateY(-75vh) translateX(12px) rotate(2deg);
-                transform: translateY(-75vh) translateX(12px) rotate(2deg);
-            }
-            100% {
-                -webkit-transform: translateY(-120vh) translateX(-8px) rotate(-1deg);
-                transform: translateY(-120vh) translateX(-8px) rotate(-1deg);
-                opacity: 0.2;
-            }
-        }
-
-        .balloon svg {
-            display: block;
-            filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.12));
-            -webkit-filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.12));
-        }
-
-        .balloon-string {
-            display: block;
-            margin: 0 auto;
-            width: 1.5px;
-            height: 50px;
-            background: rgba(200, 130, 160, 0.5);
-        }
-
-        .countdown-wrapper {
+        .header-inner {
             position: relative;
-            z-index: 1;
-            text-align: center;
-            padding: 15px;
-            width: 100%;
-            max-width: 600px;
-        }
-
-        .title {
-            font-size: 7vw;
-            color: #d4548a;
-            margin-bottom: 20px;
-            text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.7);
-            font-weight: 700;
-        }
-
-        .countdown-display {
-            display: -webkit-flex;
             display: flex;
-            -webkit-flex-direction: row;
-            flex-direction: row;
-            -webkit-align-items: center;
             align-items: center;
-            -webkit-justify-content: center;
-            justify-content: center;
-            gap: 6px;
-            direction: ltr;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
         }
 
-        .time-unit {
-            display: -webkit-flex;
-            display: flex;
-            -webkit-flex-direction: column;
-            flex-direction: column;
-            -webkit-align-items: center;
-            align-items: center;
+        .header-titles {
+            flex: 1;
         }
 
-        .time-value {
-            font-size: 11vw;
-            font-weight: 800;
+        .site-title {
+            font-size: clamp(1.1rem, 2.8vw, 2rem);
+            font-weight: 900;
             color: #fff;
-            background: -webkit-linear-gradient(315deg, #f8b4cc, #f799b8);
-            background: linear-gradient(135deg, #f8b4cc, #f799b8);
-            padding: 8px 12px;
-            border-radius: 14px;
-            min-width: 18vw;
+            text-shadow: 0 0 20px rgba(192,57,43,0.8);
+            line-height: 1.2;
+        }
+
+        .site-title .trophy {
+            color: var(--red);
+            animation: flicker 3s ease-in-out infinite;
+        }
+
+        @keyframes flicker {
+            0%, 95%, 100% { opacity: 1; }
+            96% { opacity: 0.5; }
+            97% { opacity: 1; }
+            98% { opacity: 0.3; }
+        }
+
+        .site-subtitle {
+            font-size: clamp(0.65rem, 1.5vw, 0.9rem);
+            color: #ff9999;
+            margin-top: 2px;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+
+        /* ===== STATS BAR ===== */
+        .stats-bar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .stat-chip {
+            background: rgba(192, 57, 43, 0.15);
+            border: 1px solid rgba(192, 57, 43, 0.4);
+            border-radius: 8px;
+            padding: 5px 12px;
             text-align: center;
-            -webkit-box-shadow: 0 6px 20px rgba(213, 84, 138, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.5);
-            box-shadow: 0 6px 20px rgba(213, 84, 138, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.5);
-            text-shadow: 2px 2px 4px rgba(180, 60, 110, 0.3);
-            line-height: 1.3;
+            min-width: 90px;
         }
 
-        .time-label {
-            font-size: 3vw;
-            color: #c44e80;
-            margin-top: 5px;
+        .stat-num {
+            font-size: clamp(1rem, 2vw, 1.4rem);
+            font-weight: 800;
+            color: #ff6b6b;
+            display: block;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-label {
+            font-size: 0.6rem;
+            color: var(--muted);
+            margin-top: 1px;
+            display: block;
+        }
+
+        /* ===== ALERT TICKER ===== */
+        .alert-bar {
+            background: var(--red);
+            padding: 5px 0;
+            flex-shrink: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .ticker-wrap {
+            display: flex;
+            animation: ticker 35s linear infinite;
+            white-space: nowrap;
+        }
+
+        .ticker-item {
+            padding: 0 40px;
+            font-size: 0.82rem;
             font-weight: 600;
+            color: #fff;
+            flex-shrink: 0;
         }
 
-        .separator {
-            font-size: 8vw;
-            color: #e888aa;
-            font-weight: 800;
-            padding-bottom: 20px;
-            -webkit-animation: pulse 1s ease-in-out infinite;
-            animation: pulse 1s ease-in-out infinite;
+        .ticker-item::before {
+            content: '⚠ ';
         }
 
-        @-webkit-keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+        @keyframes ticker {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+        /* ===== MAP AREA ===== */
+        .map-section {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            min-height: 0;
         }
 
-        .target-time {
-            margin-top: 25px;
-            font-size: 3.8vw;
-            color: #d6006f;
-            font-weight: 700;
-            background: rgba(255, 255, 255, 0.45);
-            padding: 10px 18px;
-            border-radius: 25px;
-            -webkit-box-shadow: 0 3px 12px rgba(214, 0, 111, 0.15);
-            box-shadow: 0 3px 12px rgba(214, 0, 111, 0.15);
-            direction: rtl;
+        .map-section iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        .map-overlay-label {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0,0,0,0.75);
+            border: 1px solid rgba(192,57,43,0.6);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 0.75rem;
+            color: #ff9999;
+            pointer-events: none;
+            z-index: 10;
+            backdrop-filter: blur(4px);
+        }
+
+        .live-dot {
             display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff4444;
+            margin-left: 6px;
+            animation: livePulse 1.2s ease-in-out infinite;
+            vertical-align: middle;
         }
 
-        .finished-message {
-            display: none;
-            font-size: 9vw;
-            color: #d4548a;
-            font-weight: 800;
-            text-shadow: 2px 2px 6px rgba(255, 255, 255, 0.7);
-            -webkit-animation: celebratePulse 0.8s ease-in-out infinite alternate;
-            animation: celebratePulse 0.8s ease-in-out infinite alternate;
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.7); }
         }
 
-        @-webkit-keyframes celebratePulse {
-            0% { -webkit-transform: scale(1); transform: scale(1); }
-            100% { -webkit-transform: scale(1.08); transform: scale(1.08); }
+        /* ===== FOOTER ===== */
+        footer {
+            background: #0d0d0d;
+            border-top: 1px solid var(--border);
+            padding: 6px 20px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
-        @keyframes celebratePulse {
-            0% { -webkit-transform: scale(1); transform: scale(1); }
-            100% { -webkit-transform: scale(1.08); transform: scale(1.08); }
+        .footer-slogan {
+            font-size: 0.7rem;
+            color: var(--muted);
         }
 
-        /* Desktop */
-        @media (min-width: 600px) {
-            .title { font-size: 2.5rem; }
-            .time-value { font-size: 5rem; padding: 15px 25px; min-width: 120px; border-radius: 18px; }
-            .time-label { font-size: 1.1rem; }
-            .separator { font-size: 3.5rem; }
-            .target-time { font-size: 1.3rem; }
-            .countdown-display { gap: 15px; }
-            .finished-message { font-size: 4rem; }
+        .footer-slogan strong {
+            color: #ff8888;
+        }
+
+        .minister-name {
+            font-size: 0.65rem;
+            color: #555;
+        }
+
+        /* ===== MOBILE ===== */
+        @media (max-width: 600px) {
+            header { padding: 8px 12px; }
+            .stats-bar { gap: 5px; }
+            .stat-chip { min-width: 75px; padding: 4px 8px; }
+            footer { padding: 5px 12px; }
         }
     </style>
 </head>
 <body>
-    <div class="balloons-container" id="bc"></div>
+<div class="page">
 
-    <div class="countdown-wrapper">
-        <div class="title">&#9203; שעון עצר &#9203;</div>
-
-        <div class="countdown-display" id="cd">
-            <div class="time-unit">
-                <div class="time-value" id="d">00</div>
-                <div class="time-label">ימים</div>
+    <!-- HEADER -->
+    <header>
+        <div class="header-inner">
+            <div class="header-titles">
+                <h1 class="site-title">
+                    <span class="trophy">🏆</span>
+                    מפת ההצלחות של מירי רגב
+                    <span class="trophy">🏆</span>
+                </h1>
+                <p class="site-subtitle">
+                    שרת התחבורה שמחברת את ישראל — פקק בפקק, תאונה בתאונה
+                </p>
             </div>
-            <div class="separator">:</div>
-            <div class="time-unit">
-                <div class="time-value" id="h">00</div>
-                <div class="time-label">שעות</div>
-            </div>
-            <div class="separator">:</div>
-            <div class="time-unit">
-                <div class="time-value" id="m">00</div>
-                <div class="time-label">דקות</div>
-            </div>
-            <div class="separator">:</div>
-            <div class="time-unit">
-                <div class="time-value" id="s">00</div>
-                <div class="time-label">שניות</div>
+            <div class="stats-bar" id="statsBar">
+                <div class="stat-chip">
+                    <span class="stat-num" id="statJams">—</span>
+                    <span class="stat-label">פקקים ברגע זה</span>
+                </div>
+                <div class="stat-chip">
+                    <span class="stat-num" id="statDelay">—</span>
+                    <span class="stat-label">ק"מ בעיכוב</span>
+                </div>
+                <div class="stat-chip">
+                    <span class="stat-num" id="statMinutes">—</span>
+                    <span class="stat-label">דק' בזבוז ממוצע</span>
+                </div>
             </div>
         </div>
+    </header>
 
-        <div class="finished-message" id="fm">&#127881; הזמן הגיע! &#127881;</div>
-
-        <div class="target-time">
-            &#128336; שעת היעד בישראל: 06:59 בבוקר, 19/02/2026
+    <!-- ALERT TICKER -->
+    <div class="alert-bar">
+        <div class="ticker-wrap" id="ticker">
+            <span class="ticker-item">פקק כבד בכביש 1 לכיוון ירושלים — 45 דקות עיכוב</span>
+            <span class="ticker-item">תאונה בצומת גלילות — נסיעה חלופית דרך כביש 4</span>
+            <span class="ticker-item">עצירות בנהריה — כביש 4 פקוק לאורך 18 ק"מ</span>
+            <span class="ticker-item">עיכוב ברכבת ישראל — שוב</span>
+            <span class="ticker-item">פקק בכניסה לת"א מכיוון דרום — תחנת אזריאלי עצורה</span>
+            <span class="ticker-item">תשתיות בנייה בכביש 6 — צמצום נתיבים</span>
+            <span class="ticker-item">הצטברות בצומת לה-גרדיה — 30 דקות עיכוב</span>
+            <span class="ticker-item">מחלף קסם חסום — 25 דקות עיכוב לכיוון הצפון</span>
+            <!-- duplicate for seamless loop -->
+            <span class="ticker-item">פקק כבד בכביש 1 לכיוון ירושלים — 45 דקות עיכוב</span>
+            <span class="ticker-item">תאונה בצומת גלילות — נסיעה חלופית דרך כביש 4</span>
+            <span class="ticker-item">עצירות בנהריה — כביש 4 פקוק לאורך 18 ק"מ</span>
+            <span class="ticker-item">עיכוב ברכבת ישראל — שוב</span>
+            <span class="ticker-item">פקק בכניסה לת"א מכיוון דרום — תחנת אזריאלי עצורה</span>
+            <span class="ticker-item">תשתיות בנייה בכביש 6 — צמצום נתיבים</span>
+            <span class="ticker-item">הצטברות בצומת לה-גרדיה — 30 דקות עיכוב</span>
+            <span class="ticker-item">מחלף קסם חסום — 25 דקות עיכוב לכיוון הצפון</span>
         </div>
     </div>
 
-    <script>
-        // Target: 18/02/2026 23:59:00 New York time (EST, UTC-5)
-        // In UTC: 19 Feb 2026 04:59:00
-        var TARGET_MS = Date.UTC(2026, 1, 19, 4, 59, 0);
+    <!-- MAP -->
+    <div class="map-section">
+        <iframe
+            src="https://embed.waze.com/iframe?zoom=8&lat=31.77&lon=34.99&ct=livemap&pin=0"
+            allowfullscreen
+            loading="lazy"
+            title="מפת תנועה חיה של ישראל"
+        ></iframe>
+        <div class="map-overlay-label">
+            <span class="live-dot"></span>
+            מפת תנועה חיה — Waze
+        </div>
+    </div>
 
-        var dE = document.getElementById('d');
-        var hE = document.getElementById('h');
-        var mE = document.getElementById('m');
-        var sE = document.getElementById('s');
-        var cdE = document.getElementById('cd');
-        var fmE = document.getElementById('fm');
+    <!-- FOOTER -->
+    <footer>
+        <span class="footer-slogan">
+            כל פקק הוא <strong>הצלחה נוספת</strong> במרשם ניהול התחבורה של ישראל
+        </span>
+        <span class="minister-name">מירי רגב — שרת התחבורה</span>
+    </footer>
 
-        function pad(n) {
-            return n < 10 ? '0' + n : '' + n;
-        }
+</div>
 
-        function tick() {
-            var diff = TARGET_MS - Date.now();
-            if (diff <= 0) {
-                dE.textContent = '00';
-                hE.textContent = '00';
-                mE.textContent = '00';
-                sE.textContent = '00';
-                cdE.style.display = 'none';
-                fmE.style.display = 'block';
-                return;
-            }
-            var t = Math.floor(diff / 1000);
-            dE.textContent = pad(Math.floor(t / 86400));
-            hE.textContent = pad(Math.floor((t % 86400) / 3600));
-            mE.textContent = pad(Math.floor((t % 3600) / 60));
-            sE.textContent = pad(t % 60);
-        }
+<script>
+    // Simulated live stats that fluctuate realistically
+    var baseJams    = 180;
+    var baseDelay   = 420;
+    var baseMinutes = 28;
 
-        tick();
+    function randDelta(range) {
+        return Math.floor((Math.random() - 0.5) * 2 * range);
+    }
 
-        // Use both setInterval and requestAnimationFrame for reliability in WebViews
-        setInterval(tick, 500);
+    function updateStats() {
+        baseJams    = Math.max(120, Math.min(350, baseJams    + randDelta(4)));
+        baseDelay   = Math.max(280, Math.min(700, baseDelay   + randDelta(10)));
+        baseMinutes = Math.max(18,  Math.min(55,  baseMinutes + randDelta(2)));
 
-        // Also use requestAnimationFrame as backup - WebView may throttle setInterval
-        (function rafLoop() {
-            tick();
-            requestAnimationFrame(rafLoop);
-        })();
+        document.getElementById('statJams').textContent    = baseJams;
+        document.getElementById('statDelay').textContent   = baseDelay;
+        document.getElementById('statMinutes').textContent = baseMinutes;
+    }
 
-        // Also re-tick on visibility change (WhatsApp WebView pauses timers)
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) { tick(); }
-        }, false);
-
-        // Balloon system - lightweight SVG-based for mobile performance
-        var bc = document.getElementById('bc');
-        var pinkColors = ['#f5a0b8','#f7b0c4','#f299ae','#efa3ba','#f0889e','#f4b8ca','#e8909f','#f5c0d0'];
-        var maxBalloons = 12;
-        var balloonCount = 0;
-
-        function heartSVG(color, w) {
-            return '<svg width="' + w + '" height="' + Math.round(w * 0.9) + '" viewBox="0 0 100 90">' +
-                '<path d="M50 85C25 60 0 40 0 25 0 10 12 0 25 0c10 0 20 8 25 18C55 8 65 0 75 0c13 0 25 10 25 25 0 15-25 35-50 60z" fill="' + color + '"/>' +
-                '</svg>';
-        }
-
-        function roundSVG(color, w) {
-            var h = Math.round(w * 1.25);
-            return '<svg width="' + w + '" height="' + (h + 10) + '" viewBox="0 0 ' + w + ' ' + (h + 10) + '">' +
-                '<ellipse cx="' + (w/2) + '" cy="' + (h/2) + '" rx="' + (w/2) + '" ry="' + (h/2) + '" fill="' + color + '"/>' +
-                '<polygon points="' + (w/2 - 5) + ',' + h + ' ' + (w/2 + 5) + ',' + h + ' ' + (w/2) + ',' + (h + 9) + '" fill="' + color + '"/>' +
-                '</svg>';
-        }
-
-        function makeBalloon() {
-            if (balloonCount >= maxBalloons) return;
-            balloonCount++;
-
-            var el = document.createElement('div');
-            el.className = 'balloon';
-            var color = pinkColors[Math.floor(Math.random() * pinkColors.length)];
-            var isHeart = Math.random() > 0.5;
-            var size = 35 + Math.floor(Math.random() * 25);
-
-            var svg = isHeart ? heartSVG(color, size) : roundSVG(color, size);
-            el.innerHTML = svg + '<div class="balloon-string"></div>';
-
-            el.style.left = (5 + Math.random() * 90) + '%';
-            var dur = 9 + Math.random() * 9;
-            el.style.animationDuration = dur + 's';
-            el.style.webkitAnimationDuration = dur + 's';
-            el.style.animationDelay = (Math.random() * 1.5) + 's';
-            el.style.webkitAnimationDelay = (Math.random() * 1.5) + 's';
-
-            bc.appendChild(el);
-
-            setTimeout(function() {
-                if (el.parentNode) el.parentNode.removeChild(el);
-                balloonCount--;
-            }, (dur + 2) * 1000);
-        }
-
-        // Stagger initial balloons
-        for (var i = 0; i < 8; i++) {
-            (function(idx) {
-                setTimeout(function() { makeBalloon(); }, idx * 700);
-            })(i);
-        }
-
-        // Continuous creation
-        setInterval(function() { makeBalloon(); }, 2000);
-    </script>
+    updateStats();
+    setInterval(updateStats, 7000);
+</script>
 </body>
 </html>
